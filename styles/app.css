@@ -115,6 +115,62 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .empty { padding: 3rem 1rem; text-align: center; color: var(--fg-faint); }
 .empty .big { font-size: 34px; margin-bottom: .5rem; }
+.err-detail {
+  display: inline-block; max-width: 100%; margin-top: .75rem; padding: .6rem .8rem;
+  background: var(--bg-sunken); border-radius: var(--radius-sm);
+  color: var(--danger); font-size: 12.5px; text-align: left;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* ---------- 首页 ---------- */
+
+#view-home {
+  flex: 1; overflow-y: auto; overscroll-behavior: contain;
+  padding: clamp(1.5rem, 5vw, 3.5rem) 1.25rem 3rem;
+}
+
+.home-head { max-width: 1080px; margin: 0 auto 1.75rem; }
+.home-head h1 { font-size: clamp(24px, 5vw, 34px); }
+.home-head .tagline { margin: .5rem 0 1.25rem; color: var(--fg-dim); font-size: 15px; }
+#home-search { width: min(320px, 100%); }
+
+.city-grid {
+  display: grid; gap: 14px; max-width: 1080px; margin: 0 auto;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+
+.city-card {
+  display: flex; gap: 14px; align-items: center;
+  padding: 14px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg-elev); color: inherit; text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.city-card:hover {
+  transform: translateY(-2px); box-shadow: var(--shadow);
+  border-color: var(--accent); text-decoration: none;
+}
+.city-card .cover {
+  flex: none; width: 56px; height: 56px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; font-size: 30px; line-height: 1;
+  background: var(--bg-sunken);
+}
+.city-card .body { min-width: 0; }
+.city-card .title-row { display: flex; align-items: baseline; gap: .5rem; }
+.city-card h3 { font-size: 17px; }
+.city-card .region {
+  padding: 1px 6px; border-radius: 999px; background: var(--bg-sunken);
+  color: var(--fg-faint); font-size: 11.5px;
+}
+.city-card .tagline {
+  margin: .3rem 0 .45rem; color: var(--fg-dim); font-size: 13px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.city-card .meta { display: flex; gap: .75rem; color: var(--fg-faint); font-size: 11.5px; }
+
+.home-foot {
+  max-width: 1080px; margin: 2rem auto 0; padding-top: 1rem;
+  border-top: 1px solid var(--line); color: var(--fg-faint); font-size: 12.5px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
