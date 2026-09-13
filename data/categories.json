@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "note": "分类定义集中在这里：新增一类只改本文件，前端不需要动代码。color 同时用于地图标记和筛选 chip，选的是在深浅两种背景下都能分辨的高饱和色。",
+  "categories": [
+    { "id": "food",    "label": "美食",   "emoji": "🍜", "color": "#e5484d", "order": 1 },
+    { "id": "sight",   "label": "景点",   "emoji": "🏯", "color": "#f5a524", "order": 2 },
+    { "id": "museum",  "label": "博物馆", "emoji": "🏛️", "color": "#8b5cf6", "order": 3 },
+    { "id": "park",    "label": "公园",   "emoji": "🌳", "color": "#10b981", "order": 4 },
+    { "id": "cafe",    "label": "咖啡茶馆", "emoji": "☕", "color": "#b45309", "order": 5 },
+    { "id": "night",   "label": "夜景酒吧", "emoji": "🌃", "color": "#0ea5e9", "order": 6 },
+    { "id": "shop",    "label": "逛街购物", "emoji": "🛍️", "color": "#ec4899", "order": 7 },
+    { "id": "stay",    "label": "住宿",   "emoji": "🛏️", "color": "#6366f1", "order": 8 },
+    { "id": "transit", "label": "交通",   "emoji": "🚇", "color": "#64748b", "order": 9 }
+  ]
+}

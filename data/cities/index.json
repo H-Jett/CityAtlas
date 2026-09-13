@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "updated": "2026-09-13",
+  "cities": [
+    {
+      "id": "chengdu",
+      "name": "成都",
+      "nameEn": "Chengdu",
+      "file": "chengdu.json",
+      "cover": "🐼",
+      "region": "四川",
+      "tagline": "火锅、茶馆，和一整天不着急的理由",
+      "center": { "lng": 104.060998, "lat": 30.568057 },
+      "zoom": 13,
+      "poiCount": 3,
+      "updated": "2026-09-13"
+    }
+  ]
+}
