@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "note": "本文件由 scripts/update_index.mjs 从 data/cities/*.json 生成，不要手改。",
-  "updated": "2026-09-13",
+  "updated": "2026-09-14",
   "cities": [
     {
       "id": "chengdu",
@@ -16,9 +16,9 @@
         "lng": 104.063299,
         "lat": 30.659841
       },
-      "zoom": 13,
+      "zoom": 12,
       "poiCount": 27,
-      "updated": "2026-09-13"
+      "updated": "2026-09-14"
     },
     {
       "id": "seoul",
@@ -35,7 +35,7 @@
       },
       "zoom": 13,
       "poiCount": 21,
-      "updated": "2026-09-13"
+      "updated": "2026-09-14"
     },
     {
       "id": "busan",
@@ -52,7 +52,7 @@
       },
       "zoom": 12,
       "poiCount": 15,
-      "updated": "2026-09-13"
+      "updated": "2026-09-14"
     },
     {
       "id": "jeju",
@@ -69,7 +69,7 @@
       },
       "zoom": 11,
       "poiCount": 15,
-      "updated": "2026-09-13"
+      "updated": "2026-09-14"
     }
   ]
 }

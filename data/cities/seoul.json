@@ -11,7 +11,7 @@
   "center": { "lng": 126.977952, "lat": 37.566535 },
   "zoom": 13,
   "basemap": "osm",
-  "updated": "2026-09-13",
+  "updated": "2026-09-14",
   "notes": "坐标为 WGS-84（由 scripts/geocode.py 经 OpenStreetMap Nominatim 查得）。韩国这边高德没有地图数据，默认用 OSM 底图。营业时间、票价一类信息会变，出门前请再确认。",
   "pois": [
     {
@@ -245,20 +245,9 @@
       "address": "钟路区仁寺洞街"
     },
     {
-      "id": "kr-seoul-stay-001",
-      "name": "明洞 / 首尔站住宿区",
-      "category": "stay",
-      "coord": { "lng": 126.985086, "lat": 37.561313 },
-      "summary": "第一次来首尔住这一带最省心",
-      "desc": "中区一带各价位酒店都有，去景福宫、东大门、南山都在半小时内。",
-      "why": "地铁 4 号线串起明洞和首尔站，去机场的 AREX 也在首尔站发车。缺点是贵且吵，图安静可以考虑弘大或钟路。",
-      "tags": ["交通方便", "偏贵", "机场快线近"],
-      "address": "中区明洞"
-    },
-    {
-      "id": "kr-seoul-transit-001",
+      "id": "kr-seoul-station-001",
       "name": "首尔站",
-      "category": "transit",
+      "category": "station",
       "coord": { "lng": 126.97236, "lat": 37.556072 },
       "summary": "KTX 和机场快线的总枢纽",
       "desc": "京釜线起点，地铁 1、4 号线和机场铁路交汇。站内有行李寄存。",
@@ -267,15 +256,26 @@
       "address": "中区世宗大路 2 街"
     },
     {
-      "id": "kr-seoul-transit-002",
+      "id": "kr-seoul-airport-001",
       "name": "仁川国际机场",
-      "category": "transit",
+      "category": "airport",
       "coord": { "lng": 126.452781, "lat": 37.447159 },
       "summary": "韩国最大的国际机场",
       "desc": "常年排在全球服务评比前列，T1 和 T2 之间要坐摆渡车，转机留足时间。",
       "why": "离首尔市区约 50 公里，AREX 直通车到首尔站 43 分钟，普通车便宜但慢。半夜到的话有机场大巴和胶囊旅馆。",
       "tags": ["国际机场", "AREX直通", "离市区远"],
       "address": "仁川广域市中区"
+    },
+    {
+      "id": "kr-seoul-airport-002",
+      "name": "金浦国际机场",
+      "category": "airport",
+      "coord": { "lng": 126.79424, "lat": 37.559008 },
+      "summary": "市区边上的老机场，国内线为主",
+      "desc": "首尔第一座机场，现在以国内航线和东亚短程国际航线为主。离市中心约 17 公里。",
+      "why": "比仁川近得多，地铁 5、9 号线和机场铁路都到。飞济州、釜山基本都从这儿走，也有飞上海虹桥、东京羽田的短程国际线。",
+      "tags": ["机场", "离市区近", "国内线为主"],
+      "address": "江西区空港洞"
     }
   ]
 }

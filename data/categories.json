@@ -9,7 +9,7 @@
     { "id": "cafe",    "label": "咖啡茶馆", "emoji": "☕", "color": "#b45309", "order": 5 },
     { "id": "night",   "label": "夜景酒吧", "emoji": "🌃", "color": "#0ea5e9", "order": 6 },
     { "id": "shop",    "label": "逛街购物", "emoji": "🛍️", "color": "#ec4899", "order": 7 },
-    { "id": "stay",    "label": "住宿",   "emoji": "🛏️", "color": "#6366f1", "order": 8 },
-    { "id": "transit", "label": "交通",   "emoji": "🚇", "color": "#64748b", "order": 9 }
+    { "id": "airport", "label": "机场",   "emoji": "✈️", "color": "#0891b2", "order": 8 },
+    { "id": "station", "label": "车站码头", "emoji": "🚉", "color": "#64748b", "order": 9 }
   ]
 }
