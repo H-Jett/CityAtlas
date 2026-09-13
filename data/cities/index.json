@@ -1,11 +1,13 @@
 {
   "schema": 1,
+  "note": "本文件由 scripts/update_index.mjs 从 data/cities/*.json 生成，不要手改。",
   "updated": "2026-09-13",
   "cities": [
     {
       "id": "chengdu",
       "name": "成都",
       "nameEn": "Chengdu",
+      "country": "cn",
       "file": "chengdu.json",
       "cover": "🐼",
       "region": "四川",
@@ -16,8 +18,58 @@
       },
       "zoom": 13,
       "poiCount": 27,
-      "updated": "2026-09-13",
-      "country": "cn"
+      "updated": "2026-09-13"
+    },
+    {
+      "id": "seoul",
+      "name": "首尔",
+      "nameEn": "Seoul",
+      "country": "kr",
+      "file": "seoul.json",
+      "cover": "🗼",
+      "region": "首尔特别市",
+      "tagline": "王宫、深夜的烤肉，和永远在施工的年轻街区",
+      "center": {
+        "lng": 126.977952,
+        "lat": 37.566535
+      },
+      "zoom": 13,
+      "poiCount": 21,
+      "updated": "2026-09-13"
+    },
+    {
+      "id": "busan",
+      "name": "釜山",
+      "nameEn": "Busan",
+      "country": "kr",
+      "file": "busan.json",
+      "cover": "🌊",
+      "region": "釜山广域市",
+      "tagline": "山、海、市场，一座斜着长在坡上的港口城市",
+      "center": {
+        "lng": 129.075642,
+        "lat": 35.179554
+      },
+      "zoom": 12,
+      "poiCount": 15,
+      "updated": "2026-09-13"
+    },
+    {
+      "id": "jeju",
+      "name": "济州岛",
+      "nameEn": "Jeju",
+      "country": "kr",
+      "file": "jeju.json",
+      "cover": "🍊",
+      "region": "济州特别自治道",
+      "tagline": "火山、黑猪肉和一圈开不完的海岸线",
+      "center": {
+        "lng": 126.531188,
+        "lat": 33.499621
+      },
+      "zoom": 11,
+      "poiCount": 15,
+      "updated": "2026-09-13"
     }
   ]
 }

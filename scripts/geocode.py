@@ -60,10 +60,10 @@ def haversine(a, b) -> float:
     return 2 * r * math.asin(min(1.0, math.sqrt(h)))
 
 
-def query_nominatim(text: str, use_cache: bool = True) -> list[dict]:
+def query_nominatim(text: str, country: str = "cn", use_cache: bool = True) -> list[dict]:
     global _last_request
     CACHE.mkdir(parents=True, exist_ok=True)
-    cache_file = CACHE / (urllib.parse.quote(text, safe="") + ".json")
+    cache_file = CACHE / f"{country}-{urllib.parse.quote(text, safe='')}.json"
     if use_cache and cache_file.exists():
         log.info("      （命中缓存）")
         return json.loads(cache_file.read_text(encoding="utf-8"))
@@ -74,7 +74,9 @@ def query_nominatim(text: str, use_cache: bool = True) -> list[dict]:
 
     url = f"{NOMINATIM}?{urllib.parse.urlencode({
         'q': text, 'format': 'json', 'limit': 5,
-        'countrycodes': 'cn', 'accept-language': 'zh',
+        'countrycodes': country,
+        # 要中文名，拿不到中文再退回本地语言和英文
+        'accept-language': 'zh-CN,zh,en',
     })}"
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     try:
@@ -90,7 +92,8 @@ def query_nominatim(text: str, use_cache: bool = True) -> list[dict]:
 
 # 地物类型的优先级。同一个名字在 OSM 里常常既是景点又是公交站/地铁站，
 # 而站点通常在景区门口甚至街对面——宽窄巷子第一版就匹配到了公交站，偏了 300 米。
-PLACE_CLASSES = {"tourism", "historic", "leisure", "amenity", "shop", "landuse", "place", "natural", "building"}
+PLACE_CLASSES = {"tourism", "historic", "leisure", "amenity", "shop", "landuse",
+                 "place", "natural", "building", "man_made", "waterway"}
 TRANSIT_CLASSES = {"railway", "aeroway", "highway", "public_transport", "amenity"}
 
 
@@ -125,7 +128,8 @@ def main() -> int:
     parser.add_argument("--city", required=True, help="城市 id，对应 configs/<city>.seed.csv")
     parser.add_argument("--out", default=str(ROOT / "data" / "cities"), help="输出目录")
     parser.add_argument("--no-cache", action="store_true", help="忽略本地缓存重新查")
-    parser.add_argument("--max-km", type=float, default=60.0, help="离城市中心多远算跑偏")
+    parser.add_argument("--max-km", type=float, default=60.0,
+                        help="离城市中心多远算跑偏。济州岛这种跨度大的地方要调大")
     args = parser.parse_args()
 
     setup_logging()
@@ -146,8 +150,9 @@ def main() -> int:
         return 2
 
     center = {"lng": float(city_meta["lng"]), "lat": float(city_meta["lat"])}
-    log.info("城市 %s（%s），中心 %.6f,%.6f，共 %d 个待查点位",
-             args.city, city_meta["name"], center["lng"], center["lat"], len(rows))
+    country = (city_meta.get("country") or "cn").strip().lower()
+    log.info("城市 %s（%s，%s），中心 %.6f,%.6f，共 %d 个待查点位",
+             args.city, city_meta["name"], country.upper(), center["lng"], center["lat"], len(rows))
     log.info("数据源 Nominatim，串行 + 每次间隔 %.1fs（遵守使用政策），预计耗时约 %.0f 秒",
              MIN_INTERVAL, len(rows) * MIN_INTERVAL)
 
@@ -158,13 +163,14 @@ def main() -> int:
 
     for i, row in enumerate(rows, 1):
         name = row["name"].strip()
+        # query 列留空就用「名称 + 城市名」；韩国地点建议直接写韩文，命中率最高
         query = (row.get("query") or "").strip() or f'{name} {city_meta["name"]}'
         elapsed = time.monotonic() - started
         eta = (elapsed / i * (len(rows) - i)) if i > 1 else len(rows) * MIN_INTERVAL
         log.info("[%d/%d %.0f%%] %s  ←  「%s」  (已用 %.0fs, 剩约 %.0fs)",
                  i, len(rows), i / len(rows) * 100, name, query, elapsed, eta)
 
-        results = query_nominatim(query, use_cache=not args.no_cache)
+        results = query_nominatim(query, country, use_cache=not args.no_cache)
         best, why = pick_best(results, center, args.max_km, row["category"].strip())
 
         poi = {
@@ -205,9 +211,13 @@ def main() -> int:
         "schema": 1,
         "id": args.city,
         "name": city_meta["name"],
+        **{k: city_meta[k].strip() for k in ("nameEn", "region", "cover", "tagline")
+           if (city_meta.get(k) or "").strip()},
+        "country": country,
         "datum": "wgs84",
         "center": center,
         "zoom": int(city_meta.get("zoom") or 12),
+        **({"basemap": city_meta["basemap"].strip()} if (city_meta.get("basemap") or "").strip() else {}),
         "updated": time.strftime("%Y-%m-%d"),
         "notes": city_meta.get("summary") or "",
         "pois": pois,
