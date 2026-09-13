@@ -8,10 +8,17 @@
   height: var(--bar-h); padding: 0 10px;
   background: var(--bg-elev); border-bottom: 1px solid var(--line);
 }
-#city-bar h2 { font-size: 17px; white-space: nowrap; }
-#poi-search { flex: 1; min-width: 0; max-width: 240px; margin-left: auto; }
+#city-bar h2 { font-size: 17px; white-space: nowrap; flex: none; }
+#poi-search { flex: 1; min-width: 80px; max-width: 260px; margin-left: auto; }
 
 #city-body { flex: 1; display: flex; min-height: 0; position: relative; }
+
+/* 底图切换浮在地图左上角。z-index 要压过 Leaflet 的瓦片层（400）但低于抽屉（500） */
+#basemap-switch {
+  position: absolute; top: 10px; left: 10px; z-index: 450;
+  background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+  box-shadow: var(--shadow); backdrop-filter: blur(6px);
+}
 
 #map {
   flex: 1; min-width: 0; height: 100%;
@@ -78,7 +85,122 @@
   overflow-y: auto; overscroll-behavior: contain;
 }
 
+.panel-body { padding: 16px 18px 28px; }
+.sheet-handle { display: none; }
+
+/* 点位详情 */
+.poi-head { margin-bottom: 12px; }
+.cat-chip {
+  display: inline-block; margin-bottom: 8px; padding: 2px 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--pin) 16%, transparent);
+  color: var(--pin); font-size: 12px; font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--pin) 35%, transparent);
+}
+.poi-head h3 { font-size: 20px; line-height: 1.3; }
+.poi-head .summary { margin: .4rem 0 0; color: var(--fg-dim); font-size: 14px; line-height: 1.55; }
+
+.why {
+  margin: 14px 0; padding: 10px 12px;
+  border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  font-size: 13.5px; line-height: 1.65;
+}
+.desc { margin: 12px 0; font-size: 13.5px; line-height: 1.7; color: var(--fg); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.tag {
+  padding: 2px 8px; border-radius: 6px; background: var(--bg-sunken);
+  color: var(--fg-dim); font-size: 12px;
+}
+
+.meta-grid {
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 14px;
+  margin: 14px 0; padding: 12px; border-radius: var(--radius-sm);
+  background: var(--bg-sunken); font-size: 13px;
+}
+.meta-grid dt { color: var(--fg-faint); white-space: nowrap; }
+.meta-grid dd { margin: 0; }
+
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; font-size: 13px; }
+
+.nearby { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.nearby h4 { margin: 0 0 8px; color: var(--fg-faint); font-size: 12px; font-weight: 600; }
+.nearby ul { margin: 0; padding: 0; list-style: none; }
+.nearby li + li { margin-top: 2px; }
+.nearby button {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 7px 8px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; text-align: left; font-size: 13px;
+}
+.nearby button:hover { background: var(--bg-sunken); }
+.nearby .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nearby .dist { color: var(--fg-faint); font-size: 11.5px; }
+
+.dot {
+  flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px;
+  border-radius: 50%; background: color-mix(in srgb, var(--pin) 20%, transparent);
+  font-size: 12px; line-height: 1;
+}
+
+.coord-line {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 11.5px; color: var(--fg-faint);
+}
+.link-like {
+  padding: 0; border: 0; background: none; color: var(--fg-dim);
+  font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.link-like:hover { color: var(--accent); text-decoration: underline; }
+.datum-note {
+  padding: 1px 5px; border-radius: 4px; background: var(--bg-sunken); font-size: 10.5px;
+}
+
+/* 城市概览（没选中点位时） */
+.overview h3 { font-size: 18px; }
+.overview .hint { margin: .4rem 0 0; color: var(--fg-dim); font-size: 13px; line-height: 1.6; }
+.overview .notes { margin: .6rem 0 0; color: var(--fg-faint); font-size: 11.5px; line-height: 1.6; }
+.cat-stats { margin: 16px 0 0; padding: 0; list-style: none; }
+.cat-stats li {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 2px; font-size: 13px; border-bottom: 1px solid var(--line);
+}
+.cat-stats li:last-child { border-bottom: 0; }
+.cat-stats .label { flex: 1; }
+.cat-stats .n { color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+
+/* ---------- 窄屏：面板变底部抽屉 ---------- */
+
 @media (max-width: 899px) {
-  #poi-search { max-width: 140px; }
-  .panel { position: absolute; left: 0; right: 0; bottom: 0; width: auto; border-left: 0; }
+  #poi-search { max-width: none; }
+  /* 抽屉贴着底边，底图切换挪到地图顶部中间偏左，别和缩放按钮撞 */
+  #basemap-switch { top: 8px; left: 8px; }
+  .panel {
+    position: absolute; left: 0; right: 0; bottom: 0; width: auto;
+    height: var(--sheet-h, 24dvh);
+    border-left: 0; border-top: 1px solid var(--line);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -6px 24px rgb(0 0 0 / .18);
+    z-index: 500; /* 压住 Leaflet 的控件层 */
+    transition: height .2s cubic-bezier(.2, .8, .3, 1);
+    touch-action: none;
+  }
+  .panel.dragging { transition: none; }
+  .panel-body { padding: 4px 16px 24px; }
+
+  .sheet-handle {
+    display: block; width: 100%; padding: 8px 0 6px;
+    border: 0; background: none; cursor: grab;
+    position: sticky; top: 0; z-index: 1;
+    background: var(--bg-elev);
+    border-radius: 16px 16px 0 0;
+  }
+  .sheet-handle .grip {
+    display: block; width: 40px; height: 4px; margin: 0 auto;
+    border-radius: 999px; background: var(--line);
+  }
+  .panel.dragging .sheet-handle { cursor: grabbing; }
+
+  /* 抽屉收起时只露出标题，内容不该还能滚 */
+  .panel[data-snap="peek"] { overflow: hidden; }
 }

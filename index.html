@@ -33,14 +33,15 @@
     <a id="back-home" href="./" class="icon-btn" title="返回城市列表" aria-label="返回城市列表">←</a>
     <h2 id="city-name"></h2>
     <input id="poi-search" type="search" placeholder="搜点位…" autocomplete="off" aria-label="搜索点位">
-    <div id="basemap-switch" class="seg" role="group" aria-label="切换底图"></div>
-    <button id="edit-toggle" class="icon-btn" title="编辑模式" aria-label="编辑模式">✎</button>
+    <button id="edit-toggle" class="icon-btn" title="编辑模式" aria-label="编辑模式">✏️</button>
   </header>
 
   <div id="filters" class="filters" role="group" aria-label="按分类筛选"></div>
 
   <div id="city-body">
     <div id="map" aria-label="城市地图"></div>
+    <!-- 底图切换浮在地图上而不是放顶栏：窄屏顶栏塞不下，而且这本来就是地图自己的控件 -->
+    <div id="basemap-switch" class="seg" role="group" aria-label="切换底图"></div>
     <aside id="panel" class="panel" aria-live="polite"></aside>
   </div>
 </section>

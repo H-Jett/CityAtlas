@@ -6,6 +6,7 @@
 
 import { h, fill, toast, errorBlock } from './dom.js';
 import { renderHome } from './ui/home.js';
+import { createPanel } from './ui/panel.js';
 import { loadCategories, loadCity } from './data/loader.js';
 import { createMap } from './map/mapview.js';
 import { createMarkerLayer } from './map/markers.js';
@@ -30,6 +31,7 @@ const ctx = {
   city: null,
   mapView: null,
   markers: null,
+  panel: null,
 };
 
 function showView(name) {
@@ -60,17 +62,21 @@ function renderBasemapSwitch(activeId) {
 }
 
 function selectPoi(poiId, { pan = true } = {}) {
-  ctx.markers.setActive(poiId);
   const poi = ctx.city.pois.find((p) => p.id === poiId);
   if (!poi) return;
+  ctx.markers.setActive(poiId);
+  ctx.panel.showPoi(poi, ctx.city);
+
   if (pan) {
-    // 右侧面板会盖住地图，往左让一让再定位
+    // 面板会盖住地图：桌面挡右边，窄屏挡下边，定位时让开对应的那块
     const wide = window.matchMedia('(min-width: 900px)').matches;
     ctx.mapView.focus(poi.coord, {
-      padding: wide ? { bottomRight: [dom.panel.offsetWidth + 40, 40] } : { bottomRight: [0, 40] },
+      padding: wide
+        ? { bottomRight: [dom.panel.offsetWidth + 40, 40], topLeft: [40, 40] }
+        : { bottomRight: [0, ctx.panel.sheetHeight() + 30], topLeft: [20, 20] },
     });
   }
-  // 详情面板在下一步接上，先把选中状态写进 URL
+
   const params = new URLSearchParams(location.search);
   params.set('poi', poiId);
   history.replaceState({}, '', `${location.pathname}?${params}`);
@@ -110,11 +116,18 @@ async function showCity(cityId, params) {
         categories: ctx.categories,
         onSelect: (id) => selectPoi(id),
       });
+      ctx.panel = createPanel(dom.panel, {
+        categories: ctx.categories,
+        onSelect: (id) => selectPoi(id),
+        // 抽屉换档会改变地图可视区域，必须让 Leaflet 重新量一次
+        onSnapChange: () => ctx.mapView.refreshSize(),
+      });
     } else {
       ctx.mapView.setBasemap(baseId);
     }
     renderBasemapSwitch(ctx.mapView.basemap().id);
     ctx.markers.render(ctx.city.pois);
+    ctx.panel.showOverview(ctx.city);
     ctx.mapView.fitToPois(ctx.city.pois);
     // 从首页切过来时容器刚从 hidden 变可见，尺寸要重新量一次
     ctx.mapView.refreshSize();
@@ -122,8 +135,13 @@ async function showCity(cityId, params) {
 
   const poiId = params.get('poi');
   if (poiId) {
-    if (ctx.city.pois.some((p) => p.id === poiId)) selectPoi(poiId);
-    else toast(`这座城市没有 id 为「${poiId}」的点位`, 'warn');
+    if (ctx.city.pois.some((p) => p.id === poiId)) {
+      selectPoi(poiId);
+    } else {
+      // 链接里的点位已经被删了或者 id 打错了：提示一下，降级成城市全景，不白屏
+      toast(`这座城市没有 id 为「${poiId}」的点位`, 'warn', 4000);
+      ctx.panel.showOverview(ctx.city);
+    }
   }
 }
 
