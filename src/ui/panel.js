@@ -115,12 +115,14 @@ export function createPanel(el, { categories = [], onSelect = null, onSnapChange
               ? `筛选出 ${visibleCount} / ${city.pois.length} 个点位`
               : `共 ${city.pois.length} 个点位`,
             '，点地图上的标记看详情。'),
-          city.notes && h('p.notes', null, city.notes),
           h('ul.cat-stats', null, ...stats.map(({ cat, n }) =>
             h('li', null,
               h('span.dot', { style: `--pin:${esc(cat.color)}` }, cat.emoji),
               h('span.label', null, cat.label),
-              h('span.n', null, n)))))));
+              h('span.n', null, n)))),
+          // 数据来源这类元信息放最后：窄屏抽屉收起时只露出顶部一小条，
+          // 那点地方应该留给分类统计，而不是一段免责说明
+          city.notes && h('p.notes', null, city.notes))));
     if (isNarrow()) setSnap('peek', { silent: true });
   }
 
