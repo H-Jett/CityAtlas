@@ -82,6 +82,38 @@ export function debounce(fn, ms = 300) {
   return wrapped;
 }
 
+/**
+ * 一个必须做选择的模态框，返回被点中的 action id。
+ * 用在"草稿和线上版对不上，你要哪份"这种地方——这类情况绝不能替用户默默选一个。
+ * 故意不提供点遮罩关闭：随手一点就丢掉一小时的录入，太贵了。
+ */
+export function modal({ title, body, actions = [], dismissible = true }) {
+  const root = qs('#modal-root');
+  return new Promise((resolve) => {
+    const close = (id) => {
+      root.replaceChildren();
+      document.removeEventListener('keydown', onKey);
+      resolve(id);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape' && dismissible) close(null);
+    };
+    document.addEventListener('keydown', onKey);
+
+    const box = h('div.modal', { role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+      h('h3', null, title),
+      typeof body === 'string' ? h('div.modal-body', { html: body }) : h('div.modal-body', null, body),
+      h('div.modal-actions', null, ...actions.map((a) =>
+        h(`button.btn${a.kind ? '.' + a.kind : ''}`, {
+          type: 'button',
+          onclick: () => close(a.id),
+        }, a.label))));
+
+    root.replaceChildren(h('div.modal-mask', null, box));
+    box.querySelector('button')?.focus();
+  });
+}
+
 /** 把 Error 渲染成页面上的一块错误提示，而不是只留在控制台 */
 export function errorBlock(title, err) {
   return h('div.empty', null,

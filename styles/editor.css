@@ -97,3 +97,32 @@
   .paste-row { grid-template-columns: 1fr auto; }
   .paste-row select { grid-column: 1 / -1; }
 }
+
+/* 有未导出改动时，计数变成醒目色 */
+.editor-bar .count.dirty {
+  padding: 1px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--warn) 22%, transparent);
+  color: var(--warn); font-weight: 600;
+}
+
+/* 软删除的点位：划掉但留在列表里，点一下就回来 */
+.poi-list li.deleted .name { text-decoration: line-through; color: var(--fg-faint); }
+.poi-list li.deleted .dot { filter: grayscale(1); opacity: .6; }
+.poi-list li.deleted .id { color: var(--ok); }
+
+/* 模态框：用在"草稿和线上版对不上，你要哪份"这种必须做选择的地方 */
+.modal-mask {
+  position: fixed; inset: 0; z-index: 9500;
+  display: grid; place-items: center; padding: 20px;
+  background: rgb(0 0 0 / .45);
+  animation: fade-in .12s ease-out;
+}
+.modal {
+  width: min(460px, 100%); padding: 20px 22px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg-elev); box-shadow: var(--shadow);
+}
+.modal h3 { font-size: 16px; margin-bottom: 10px; }
+.modal-body { color: var(--fg-dim); font-size: 13.5px; line-height: 1.7; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+@keyframes fade-in { from { opacity: 0; } }

@@ -5,4 +5,5 @@ import './crs.test.mjs';
 import './schema.test.mjs';
 import './filter.test.mjs';
 import './url.test.mjs';
+import './draft.test.mjs';
 import './data.test.mjs';

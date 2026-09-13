@@ -205,7 +205,7 @@ async function applyState() {
     if (state.edit) {
       // 编辑模式下筛选会把刚新增的点位藏起来，先清掉
       if (state.cats !== null || state.keyword) return go({ cats: null, keyword: '' }, 'replace');
-      ctx.editor.enter(ctx.city);
+      await ctx.editor.enter(ctx.city);
       applied.poi = null;
       return;
     }
