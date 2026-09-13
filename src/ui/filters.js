@@ -10,13 +10,23 @@ export function createFilters(el, { categories = [], onChange = null } = {}) {
   function draw() {
     const allIds = used.map((c) => c.id);
     const isAll = cats === null;
+    const isNone = cats !== null && cats.size === 0;
 
     fill(el,
       h('button.chip.all', {
         type: 'button',
         'aria-pressed': String(isAll),
+        title: '显示所有分类',
         onclick: () => { cats = null; draw(); onChange?.(cats); },
-      }, '全部'),
+      }, '全部显示'),
+      // 一个都不看也是合法状态：地图清空之后再一类一类点回来，比从全选状态
+      // 逐个关掉快得多——分类多了以后尤其明显
+      h('button.chip.none', {
+        type: 'button',
+        'aria-pressed': String(isNone),
+        title: '取消所有分类，再按需要一类一类点回来',
+        onclick: () => { cats = new Set(); draw(); onChange?.(cats); },
+      }, '全部取消'),
       ...used.map((c) => {
         const on = isAll || cats.has(c.id);
         return h('button.chip', {

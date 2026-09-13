@@ -45,6 +45,10 @@
   color: var(--fg);
 }
 .chip.all[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chip.none[aria-pressed="true"] { background: var(--fg-dim); border-color: var(--fg-dim); color: var(--bg-elev); }
+/* 这两个是操作按钮不是筛选项，没选中时也别跟着压暗 */
+.chip.all[aria-pressed="false"], .chip.none[aria-pressed="false"] { opacity: 1; }
+.chip.all, .chip.none { font-weight: 500; }
 .chip:hover { border-color: var(--pin, var(--accent)); }
 
 #city-body { flex: 1; display: flex; min-height: 0; position: relative; }
