@@ -11,6 +11,37 @@
 #city-bar h2 { font-size: 17px; white-space: nowrap; flex: none; }
 #poi-search { flex: 1; min-width: 80px; max-width: 260px; margin-left: auto; }
 
+/* ---------- 分类筛选条 ---------- */
+
+.filters {
+  flex: none; display: flex; gap: 6px; align-items: center;
+  padding: 8px 10px; overflow-x: auto; scrollbar-width: none;
+  background: var(--bg-elev); border-bottom: 1px solid var(--line);
+}
+.filters::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px 5px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--bg-elev);
+  color: var(--fg-dim); font-size: 13px; white-space: nowrap;
+  transition: background .12s, color .12s, border-color .12s, opacity .12s;
+}
+.chip .emoji { font-size: 13px; line-height: 1; }
+.chip .n {
+  padding: 0 5px; border-radius: 999px; background: var(--bg-sunken);
+  color: var(--fg-faint); font-size: 11px; font-variant-numeric: tabular-nums;
+}
+/* 未选中的 chip 压暗但不隐藏——还得让人看见有哪些分类可以点回来 */
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--pin, var(--accent)) 14%, transparent);
+  border-color: color-mix(in srgb, var(--pin, var(--accent)) 45%, transparent);
+  color: var(--fg);
+}
+.chip.all[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chip:hover { border-color: var(--pin, var(--accent)); }
+
 #city-body { flex: 1; display: flex; min-height: 0; position: relative; }
 
 /* 底图切换浮在地图左上角。z-index 要压过 Leaflet 的瓦片层（400）但低于抽屉（500） */

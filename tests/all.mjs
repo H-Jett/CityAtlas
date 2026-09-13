@@ -3,4 +3,5 @@
 
 import './crs.test.mjs';
 import './schema.test.mjs';
+import './filter.test.mjs';
 import './data.test.mjs';

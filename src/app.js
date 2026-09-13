@@ -4,9 +4,11 @@
 // 始终留在文档里不重建——Leaflet 实例重建一次就要重新拉一遍瓦片，而且容器尺寸
 // 在 hidden 状态下是 0，重建时机稍有不慎就会得到一张灰图。
 
-import { h, fill, toast, errorBlock } from './dom.js';
+import { h, fill, toast, errorBlock, debounce } from './dom.js';
 import { renderHome } from './ui/home.js';
 import { createPanel } from './ui/panel.js';
+import { createFilters } from './ui/filters.js';
+import { filterPois } from './ui/filter.js';
 import { loadCategories, loadCity } from './data/loader.js';
 import { createMap } from './map/mapview.js';
 import { createMarkerLayer } from './map/markers.js';
@@ -22,6 +24,8 @@ const dom = {
   basemapSwitch: document.getElementById('basemap-switch'),
   panel: document.getElementById('panel'),
   map: document.getElementById('map'),
+  filters: document.getElementById('filters'),
+  poiSearch: document.getElementById('poi-search'),
 };
 
 // 城市页是有状态的：地图实例和标记层跨路由复用，切城市只换数据不重建地图
@@ -32,7 +36,30 @@ const ctx = {
   mapView: null,
   markers: null,
   panel: null,
+  filters: null,
+  keyword: '',
 };
+
+/** 筛选变化后统一走这里：重算可见集合 → 同步标记显隐 → 没选中点位时更新概览 */
+function applyFilter({ fit = false } = {}) {
+  const cats = ctx.filters.cats();
+  const visible = filterPois(ctx.city.pois, { cats, keyword: ctx.keyword });
+  ctx.markers.setVisible(new Set(visible.map((p) => p.id)));
+
+  const activeId = ctx.markers.activeId();
+  // 当前选中的点位被筛掉了就退回概览，不然面板显示的东西在地图上根本找不到
+  if (!activeId || !visible.some((p) => p.id === activeId)) {
+    ctx.markers.setActive(null);
+    ctx.panel.showOverview(ctx.city, { visibleCount: visible.length });
+    const params = new URLSearchParams(location.search);
+    if (params.has('poi')) {
+      params.delete('poi');
+      history.replaceState({}, '', `${location.pathname}?${params}`);
+    }
+  }
+  if (fit && visible.length) ctx.mapView.fitToPois(visible);
+  return visible;
+}
 
 function showView(name) {
   for (const [key, el] of Object.entries(views)) el.hidden = key !== name;
@@ -122,11 +149,20 @@ async function showCity(cityId, params) {
         // 抽屉换档会改变地图可视区域，必须让 Leaflet 重新量一次
         onSnapChange: () => ctx.mapView.refreshSize(),
       });
+      ctx.filters = createFilters(dom.filters, {
+        categories: ctx.categories,
+        onChange: () => applyFilter(),
+      });
+      dom.poiSearch.addEventListener('input', debounce(() => {
+        ctx.keyword = dom.poiSearch.value.trim();
+        applyFilter();
+      }, 180));
     } else {
       ctx.mapView.setBasemap(baseId);
     }
     renderBasemapSwitch(ctx.mapView.basemap().id);
     ctx.markers.render(ctx.city.pois);
+    ctx.filters.setCity(ctx.city.pois, null);
     ctx.panel.showOverview(ctx.city);
     ctx.mapView.fitToPois(ctx.city.pois);
     // 从首页切过来时容器刚从 hidden 变可见，尺寸要重新量一次
