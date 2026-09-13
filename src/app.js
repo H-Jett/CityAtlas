@@ -17,6 +17,7 @@ import { loadCategories, loadCity } from './data/loader.js';
 import { createMap } from './map/mapview.js';
 import { createMarkerLayer } from './map/markers.js';
 import { BASEMAPS, DEFAULT_BASEMAP, findBasemap } from './map/basemaps.js';
+import { createEditor } from './editor/editor.js';
 
 const views = {
   home: document.getElementById('view-home'),
@@ -35,7 +36,7 @@ const dom = {
 let state = parseUrl(location.search);
 
 // 已经反映到界面上的状态，用来跳过无谓的重算（重载城市、重画 chips 都不便宜）
-const applied = { city: null, poi: null, cats: '', keyword: '', base: null };
+const applied = { city: null, poi: null, cats: '', keyword: '', base: null, edit: false };
 
 const ctx = {
   categories: null,
@@ -45,6 +46,7 @@ const ctx = {
   markers: null,
   panel: null,
   filters: null,
+  editor: null,
 };
 
 const catsKey = (cats) => (cats === null ? '*' : [...cats].sort().join(','));
@@ -131,6 +133,13 @@ async function mountCity(cityId) {
       // 打字不该往历史里塞东西
       go({ keyword: dom.poiSearch.value.trim() }, 'replace');
     }, 180));
+    ctx.editor = createEditor({
+      el: dom.panel,
+      mapView: ctx.mapView,
+      markers: ctx.markers,
+      categories: ctx.categories,
+      onExit: () => go({ edit: false }, 'replace'),
+    });
   }
 
   ctx.markers.render(city.pois);
@@ -187,6 +196,27 @@ async function applyState() {
     }
   }
 
+  if (applied.edit !== state.edit) {
+    applied.edit = state.edit;
+    document.getElementById('edit-toggle').setAttribute('aria-pressed', String(state.edit));
+    // 编辑模式下藏掉筛选条：chips 是进入时按现有分类算的，新增一个别的分类的点位
+    // 会立刻被筛没，找不回来
+    dom.filters.hidden = state.edit;
+    if (state.edit) {
+      // 编辑模式下筛选会把刚新增的点位藏起来，先清掉
+      if (state.cats !== null || state.keyword) return go({ cats: null, keyword: '' }, 'replace');
+      ctx.editor.enter(ctx.city);
+      applied.poi = null;
+      return;
+    }
+    if (ctx.editor.isActive()) ctx.editor.exit();
+    ctx.markers.render(ctx.city.pois);
+    // applyFilter 在没选中点位时会把面板恢复成城市概览；
+    // 有选中点位的情况交给下面的分支重画，所以这里把 applied.poi 清掉
+    applyFilter();
+    applied.poi = null;
+  }
+
   if (applied.poi !== state.poi) {
     applied.poi = state.poi;
     if (!state.poi) {
@@ -211,6 +241,11 @@ async function applyState() {
 window.addEventListener('popstate', () => {
   state = parseUrl(location.search);
   applyState();
+});
+
+document.getElementById('edit-toggle').addEventListener('click', () => {
+  if (!state.city) return;
+  go({ edit: !state.edit, poi: null }, 'replace');
 });
 
 document.getElementById('back-home').addEventListener('click', (e) => {
