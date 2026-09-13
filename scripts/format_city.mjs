@@ -19,6 +19,12 @@ if (!files.length) {
 
 let failed = 0;
 for (const file of files) {
+  // data/cities/*.json 这种 glob 会把索引也带进来，但它是派生产物，
+  // 格式由 scripts/update_index.mjs 负责
+  if (file.endsWith('index.json')) {
+    console.log(`${file}: 跳过（索引由 update_index.mjs 生成）`);
+    continue;
+  }
   const raw = JSON.parse(readFileSync(file, 'utf-8'));
   const city = normalizeCity(raw);
   const problems = validateCity(city, []);

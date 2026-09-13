@@ -102,7 +102,12 @@ export function normalizeCity(raw) {
     schema: raw.schema ?? 1,
     id: raw.id ?? '',
     name: raw.name ?? raw.id ?? '',
+    nameEn: raw.nameEn ?? '',
     country: raw.country ?? 'cn',
+    // 首页卡片用的展示字段，放在城市文件里让它自包含，index.json 由脚本派生
+    region: raw.region ?? '',
+    cover: raw.cover ?? '',
+    tagline: raw.tagline ?? '',
     datum: 'wgs84', // 归一化后内存里永远是 WGS-84
     center: toWgs(raw.center),
     zoom: Number.isFinite(raw.zoom) ? raw.zoom : 12,
