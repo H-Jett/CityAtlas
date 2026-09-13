@@ -1,1 +1,84 @@
-/* 地图容器、divIcon 水滴标记、筛选条、详情面板与底部抽屉。见 src/map/ 与 src/ui/ */
+/* 城市页：顶栏 + 筛选条 + 地图 + 详情面板。
+   ≥900px 是「地图 + 右侧固定面板」，以下是「地图全屏 + 底部抽屉」。 */
+
+#view-city { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+#city-bar {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  height: var(--bar-h); padding: 0 10px;
+  background: var(--bg-elev); border-bottom: 1px solid var(--line);
+}
+#city-bar h2 { font-size: 17px; white-space: nowrap; }
+#poi-search { flex: 1; min-width: 0; max-width: 240px; margin-left: auto; }
+
+#city-body { flex: 1; display: flex; min-height: 0; position: relative; }
+
+#map {
+  flex: 1; min-width: 0; height: 100%;
+  background: var(--bg-sunken); /* 瓦片没来之前别是刺眼的白 */
+  z-index: 0; /* 压住 Leaflet 内部层级，免得盖到面板上 */
+}
+
+/* ---------- 地图标记 ---------- */
+
+/* Leaflet 给 .pin-wrap 设的宽高来自 iconSize，内容从左上角排；
+   水滴的圆形部分占上面 30px，下面 8px 留给指向坐标点的小三角。 */
+.pin-wrap { transition: filter .12s ease; }
+.pin-wrap.hidden { display: none; }
+.pin-wrap.draggable { cursor: grab; }
+
+.pin {
+  position: relative; display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--pin, #64748b);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / .35);
+  font-size: 15px; line-height: 1;
+  transform-origin: 50% 130%;
+  transition: transform .14s cubic-bezier(.2, .9, .3, 1.4);
+}
+.pin::after {
+  content: ''; position: absolute; bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent; border-top: 6px solid #fff;
+}
+.pin > b { display: block; font-weight: 400; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .3)); }
+
+.pin-wrap.active .pin {
+  transform: scale(1.3);
+  box-shadow: 0 4px 14px rgb(0 0 0 / .45), 0 0 0 4px color-mix(in srgb, var(--pin) 35%, transparent);
+}
+.leaflet-marker-icon:focus-visible .pin { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (prefers-color-scheme: dark) {
+  .pin { border-color: #0d1117; }
+  .pin::after { border-top-color: #0d1117; }
+}
+
+/* ---------- Leaflet 控件的深色适配 ---------- */
+
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--bg-elev) 88%, transparent) !important;
+  color: var(--fg-faint) !important;
+  font-size: 10.5px !important;
+}
+.leaflet-control-attribution a { color: var(--fg-dim) !important; }
+
+.leaflet-bar a, .leaflet-bar a:hover {
+  background: var(--bg-elev); color: var(--fg); border-bottom-color: var(--line);
+}
+.leaflet-bar a:hover { background: var(--bg-sunken); }
+.leaflet-bar { border: 1px solid var(--line) !important; box-shadow: var(--shadow) !important; }
+
+/* ---------- 详情面板（桌面：右侧固定栏） ---------- */
+
+.panel {
+  flex: none; width: var(--panel-w);
+  border-left: 1px solid var(--line); background: var(--bg-elev);
+  overflow-y: auto; overscroll-behavior: contain;
+}
+
+@media (max-width: 899px) {
+  #poi-search { max-width: 140px; }
+  .panel { position: absolute; left: 0; right: 0; bottom: 0; width: auto; border-left: 0; }
+}
