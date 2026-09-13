@@ -1,0 +1,8 @@
+node_modules/
+.venv/
+dist/
+logs/*
+!logs/.gitkeep
+.DS_Store
+*.pyc
+__pycache__/

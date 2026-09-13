@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover：刘海屏适配；禁掉输入框聚焦时的自动放大（编辑模式表单会用到） -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+<meta name="description" content="城市旅游攻略图鉴：一座城市一张地图，美食、景点、咖啡、夜景都钉在它该在的位置上。">
+<title>城市旅游攻略图鉴</title>
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./src/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="./styles/app.css">
+<link rel="stylesheet" href="./styles/map.css">
+<link rel="stylesheet" href="./styles/editor.css">
+</head>
+<body>
+
+<!-- 首页：城市卡片列表。由 src/ui/home.js 填充 -->
+<section id="view-home" hidden>
+  <header class="home-head">
+    <h1>城市旅游攻略图鉴</h1>
+    <p class="tagline">一座城市一张地图，好吃的好玩的都钉在它该在的位置上。</p>
+    <input id="home-search" type="search" placeholder="搜城市 / 省份…" autocomplete="off" aria-label="搜索城市">
+  </header>
+  <div id="city-grid" class="city-grid"></div>
+  <footer class="home-foot"></footer>
+</section>
+
+<!-- 城市页：顶栏 + 地图 + 详情面板。地图容器全局只创建一次，不随视图切换重建 -->
+<section id="view-city" hidden>
+  <header id="city-bar">
+    <a id="back-home" href="./" class="icon-btn" title="返回城市列表" aria-label="返回城市列表">←</a>
+    <h2 id="city-name"></h2>
+    <input id="poi-search" type="search" placeholder="搜点位…" autocomplete="off" aria-label="搜索点位">
+    <div id="basemap-switch" class="seg" role="group" aria-label="切换底图"></div>
+    <button id="edit-toggle" class="icon-btn" title="编辑模式" aria-label="编辑模式">✎</button>
+  </header>
+
+  <div id="filters" class="filters" role="group" aria-label="按分类筛选"></div>
+
+  <div id="city-body">
+    <div id="map" aria-label="城市地图"></div>
+    <aside id="panel" class="panel" aria-live="polite"></aside>
+  </div>
+</section>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<div id="modal-root"></div>
+
+<noscript>
+  <p style="padding:2rem;font:16px/1.6 system-ui">本站是纯前端的地图图鉴，需要启用 JavaScript 才能显示地图和点位。</p>
+</noscript>
+
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>

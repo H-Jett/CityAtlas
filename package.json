@@ -1,0 +1,10 @@
+{
+  "name": "city-atlas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "城市旅游攻略图鉴：纯静态的城市地图点位图鉴，零构建、零 API key",
+  "scripts": {
+    "test": "node tests/all.mjs"
+  }
+}

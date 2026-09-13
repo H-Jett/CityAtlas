@@ -1,0 +1,121 @@
+/* 基础变量、深浅色、排版、公共控件。
+   首页与地图页各自的布局分别在本文件下半部分与 map.css。
+   断点统一用 900px：以下是「手机/竖屏」形态，以上是「桌面/双栏」形态。 */
+
+:root {
+  --bg: #f7f8fa;
+  --bg-elev: #ffffff;
+  --bg-sunken: #eceef2;
+  --fg: #1a1d23;
+  --fg-dim: #5a6270;
+  --fg-faint: #8b93a1;
+  --line: #dfe3ea;
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
+  --danger: #dc2626;
+  --warn: #b45309;
+  --ok: #059669;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgb(0 0 0 / .06), 0 6px 20px rgb(0 0 0 / .08);
+  --bar-h: 52px;
+  --filters-h: 48px;
+  --panel-w: 380px;
+  --font: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --bg-elev: #161b22;
+    --bg-sunken: #0a0d12;
+    --fg: #e6edf3;
+    --fg-dim: #9aa4b2;
+    --fg-faint: #6e7785;
+    --line: #262c36;
+    --accent: #4d8bf5;
+    --danger: #f0616d;
+    --warn: #d99423;
+    --ok: #2ea86f;
+    --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 6px 20px rgb(0 0 0 / .5);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  /* 100dvh 而非 100vh：移动端地址栏收缩时 vh 不更新，会让地图底部被裁掉 */
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  -webkit-text-size-adjust: 100%;
+}
+
+body { display: flex; flex-direction: column; }
+
+section[hidden] { display: none !important; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -.01em; }
+
+input[type="search"], input[type="text"], input[type="number"], textarea, select {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  outline: none;
+}
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: none;
+  background: transparent; border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--fg-dim); font-size: 17px; line-height: 1;
+  text-decoration: none;
+}
+.icon-btn:hover { background: var(--bg-sunken); color: var(--fg); text-decoration: none; }
+.icon-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* 分段控件（底图切换） */
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--bg-sunken); border-radius: var(--radius-sm); }
+.seg button {
+  border: 0; background: transparent; color: var(--fg-dim);
+  padding: 4px 9px; border-radius: 6px; font-size: 12.5px; white-space: nowrap;
+}
+.seg button[aria-pressed="true"] { background: var(--bg-elev); color: var(--fg); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+
+/* toast：所有静默失败都要走它，不许 catch 了不出声 */
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  z-index: 9000; max-width: min(90vw, 520px);
+  padding: 10px 16px; border-radius: 999px;
+  background: #1a1d23ee; color: #fff; font-size: 14px; line-height: 1.5;
+  box-shadow: var(--shadow); text-align: center;
+  animation: toast-in .18s ease-out;
+}
+.toast.err { background: #b3202acc; }
+.toast.warn { background: #8a5a09dd; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } }
+
+.empty { padding: 3rem 1rem; text-align: center; color: var(--fg-faint); }
+.empty .big { font-size: 34px; margin-bottom: .5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
