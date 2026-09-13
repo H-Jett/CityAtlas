@@ -17,6 +17,8 @@ import {
   hashCity, loadDraft, loadPrev, saveDraft, discardDraft, reconcile,
   diffCities, diffCount, describeDiff, softDelete, restoreDeleted,
 } from './draft.js';
+import { cityToText, fileNameFor, downloadText, copyText, parseImported } from './exporter.js';
+import { formatProblems } from '../data/schema.js';
 
 const UNDO_LIMIT = 50;
 
@@ -120,10 +122,8 @@ export function createEditor({
       h('button.icon-btn', { type: 'button', title: '撤销（Ctrl+Z）', onclick: undo }, '↶'),
       h('button.btn.small.primary', {
         type: 'button',
-        title: '导出 JSON',
-        onclick: () => (onExport
-          ? onExport(working, published)
-          : toast('导出功能还没接上', 'warn')),
+        title: '导出 JSON（Ctrl+S）',
+        onclick: openExport,
       }, '导出'),
       h('button.btn.small', { type: 'button', onclick: () => exit() }, '退出'));
   }
@@ -257,14 +257,101 @@ export function createEditor({
     if (selectedId !== id) select(id);
   }
 
+  // ---------- 导出 / 导入 ----------
+
+  function diffList(diff) {
+    const line = (label, items, render) => items.length
+      ? h('div.diff-group', null,
+        h('span.k', null, label),
+        h('ul', null, ...items.slice(0, 8).map((x) => h('li', null, render(x))),
+          items.length > 8 && h('li.more', null, `…还有 ${items.length - 8} 条`)))
+      : null;
+
+    return h('div.diff-list', null,
+      line('新增', diff.added, (p) => p.name || p.id),
+      line('修改', diff.modified, ({ after }) => after.name || after.id),
+      line('移动', diff.moved, ({ after }) => after.name || after.id),
+      line('删除', diff.removed, (p) => p.name || p.id));
+  }
+
+  async function openExport() {
+    const text = cityToText(working);
+    const filename = fileNameFor(working);
+    const diff = currentDiff();
+    const n = diffCount(diff);
+
+    const preview = h('textarea.export-preview', { readonly: true, rows: 10, spellcheck: 'false' });
+    preview.value = text;
+
+    const importBox = h('textarea', {
+      rows: 5, spellcheck: 'false',
+      placeholder: '把之前导出的 JSON 粘进来，接着编辑',
+    });
+
+    const body = h('div.export-dialog', null,
+      h('p.summary-line', null,
+        n ? h('strong', null, describeDiff(diff)) : '和线上数据一致，没有改动。'),
+      n ? diffList(diff) : null,
+      h('p.where', null,
+        '把下面的内容存成 ', h('code', null, `data/cities/${filename}`), ' 覆盖原文件，然后 commit。'),
+      h('div.export-actions', null,
+        h('button.btn.primary', {
+          type: 'button',
+          onclick: () => {
+            downloadText(filename, text);
+            toast(`已下载 ${filename}`);
+          },
+        }, '⬇️ 下载文件'),
+        h('button.btn', {
+          type: 'button',
+          onclick: async () => {
+            const ok = await copyText(text);
+            toast(ok ? '已复制到剪贴板' : '复制失败，手动全选下面的内容吧', ok ? '' : 'warn', 4000);
+          },
+        }, '📋 复制')),
+      preview,
+      h('details.import-box', null,
+        h('summary', null, '从 JSON 导入（换台机器接着编辑）'),
+        importBox,
+        h('button.btn.small', {
+          type: 'button',
+          onclick: () => {
+            const { city: imported, problems, fatal } = parseImported(importBox.value, categories);
+            if (!imported) return toast(formatProblems(problems), 'err', 6000);
+            pushUndo();
+            working = imported;
+            markers.render(livePois());
+            selectedId = null;
+            touch();
+            draw();
+            toast(fatal
+              ? `导入了 ${imported.pois.length} 个点位，但有问题要修：${formatProblems(problems)}`
+              : `导入了 ${imported.pois.length} 个点位`, fatal ? 'warn' : '', fatal ? 6000 : 2600);
+          },
+        }, '导入')));
+
+    await modal({
+      title: '导出这座城市的 JSON',
+      body,
+      actions: [{ id: 'close', label: '关闭', kind: 'primary' }],
+    });
+  }
+
   const onKeyDown = (e) => {
     if (!active) return;
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-      // 在输入框里打字时让浏览器自己处理撤销
-      const tag = document.activeElement?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const mod = e.metaKey || e.ctrlKey;
+    const tag = document.activeElement?.tagName;
+    const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+
+    if (mod && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+      if (typing) return; // 在输入框里打字时让浏览器自己处理撤销
       e.preventDefault();
       undo();
+    }
+    // Ctrl+S 是"存盘"的肌肉记忆，在这里唯一对应的动作就是导出
+    if (mod && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      openExport();
     }
   };
 
