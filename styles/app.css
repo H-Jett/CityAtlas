@@ -174,8 +174,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
-/* 国家筛选条（首页），只有两个及以上国家时才出现 */
-#country-bar { margin-top: 14px; padding: 0; background: none; border: 0; }
+/* 国家筛选条（首页），只有两个及以上国家时才出现。空的时候不占位 */
+#country-bar { margin-top: 14px; }
+#country-bar:empty { display: none; }
 
 /* 按国家分组 */
 .country-group + .country-group { margin-top: 28px; }

@@ -41,7 +41,12 @@ SCENES = [
     ("home", "", None),
     ("city", "?city=chengdu", None),
     ("city-poi", "?city=chengdu&poi=cd-sight-001", None),
+    # 同一个点位分别在高德和 OSM 底图下截一张，人工比对标记有没有偏移。
+    # 这是坐标系那套换算唯一靠谱的验收方式
     ("city-osm", "?city=chengdu&base=osm", None),
+    # 境外城市：底图应该自动是 OSM，且底图切换里不该出现高德
+    ("abroad", "?city=seoul", None),
+    ("abroad-poi", "?city=seoul&poi=kr-seoul-sight-001", None),
 ]
 
 log = logging.getLogger("shot")

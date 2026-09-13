@@ -13,12 +13,17 @@
 
 /* ---------- 分类筛选条 ---------- */
 
-.filters {
+.chip-bar {
   flex: none; display: flex; gap: 6px; align-items: center;
-  padding: 8px 10px; overflow-x: auto; scrollbar-width: none;
+  overflow-x: auto; scrollbar-width: none;
+}
+.chip-bar::-webkit-scrollbar { display: none; }
+
+/* 城市页的分类筛选条：贴在顶栏下面，自带底色和分隔线 */
+#filters {
+  padding: 8px 10px;
   background: var(--bg-elev); border-bottom: 1px solid var(--line);
 }
-.filters::-webkit-scrollbar { display: none; }
 
 .chip {
   flex: none; display: inline-flex; align-items: center; gap: 5px;

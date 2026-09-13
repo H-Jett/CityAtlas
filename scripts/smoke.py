@@ -67,15 +67,34 @@ def run(page, base: str) -> None:
     index = json.loads((ROOT / "data/cities/index.json").read_text(encoding="utf-8"))
     total = index["cities"][0]["poiCount"]
 
+    countries = {c["id"] for c in index["cities"] if c.get("country")}
+
     log.info("首页 → 城市页")
     page.goto(base, wait_until="load")
     page.wait_for_selector(".city-card")
     check("首页列出了城市卡片", page.locator(".city-card").count() >= 1)
+
+    if len(countries) > 1:
+        log.info("首页国家筛选")
+        check("多个国家时出现国家筛选条", page.locator("#country-bar .chip").count() >= 3)
+        all_cards = page.locator(".city-card").count()
+        chip = page.locator("#country-bar .chip:not(.all)").first
+        want = int(chip.locator(".n").inner_text())
+        chip.click()
+        page.wait_for_timeout(250)
+        check(f"点一个国家只剩这个国家的城市（{want} 座）",
+              page.locator(".city-card").count() == want,
+              f"实际 {page.locator('.city-card').count()}")
+        check("国家筛选写进 URL", "country=" in page.url, page.url)
+        page.locator("#country-bar .chip.all").click()
+        page.wait_for_timeout(250)
+        check("点「全部」恢复所有城市", page.locator(".city-card").count() == all_cards)
+        check("恢复后 URL 里不留 country", "country=" not in page.url, page.url)
     page.locator(".city-card").first.click()
     page.wait_for_selector(".pin-wrap")
     check("点卡片进到城市页，URL 带上 city", "city=chengdu" in page.url, page.url)
     check(f"{total} 个标记都画出来了", visible_pins(page) == total, f"实际 {visible_pins(page)}")
-    check("筛选 chips 出来了", page.locator(".filters .chip").count() >= 2)
+    check("筛选 chips 出来了", page.locator("#filters .chip").count() >= 2)
 
     log.info("点标记 → 详情面板")
     page.locator(".pin-wrap").first.click()
@@ -92,13 +111,13 @@ def run(page, base: str) -> None:
     check("没有标记还停在 active 态", page.locator(".pin-wrap.active").count() == 0)
 
     log.info("分类筛选")
-    chip = page.locator(".filters .chip:not(.all)").first
+    chip = page.locator("#filters .chip:not(.all)").first
     want = int(chip.locator(".n").inner_text())  # chip 上的计数就是期望的可见标记数
     chip.click()
     page.wait_for_timeout(300)
     check(f"点一个分类 chip 后只剩这一类（{want} 个）", visible_pins(page) == want, f"实际 {visible_pins(page)}")
     check("筛选写进了 URL", "cat=" in page.url, page.url)
-    page.locator(".filters .chip.all").click()
+    page.locator("#filters .chip.all").click()
     page.wait_for_timeout(300)
     check("点「全部」恢复所有标记", visible_pins(page) == total, f"实际 {visible_pins(page)}")
     check("恢复全部后 URL 里不留 cat", "cat=" not in page.url, page.url)
@@ -119,6 +138,18 @@ def run(page, base: str) -> None:
     check("深链直接选中了点位", "鹤鸣" in page.locator(".poi-head h3").inner_text())
     check("深链指定的底图生效",
           page.locator('#basemap-switch button[aria-pressed="true"]').inner_text() == "OSM")
+
+    abroad = next((c for c in index["cities"] if c.get("country") not in (None, "cn")), None)
+    if abroad:
+        log.info("境外城市：底图要自动避开只有国内数据的源")
+        page.goto(base + f"?city={abroad['id']}", wait_until="load")
+        page.wait_for_selector(".pin-wrap")
+        labels = page.eval_on_selector_all("#basemap-switch button", "els => els.map(e => e.textContent)")
+        check(f"{abroad['name']}的底图选项里没有高德", "高德" not in labels, str(labels))
+        active = page.locator('#basemap-switch button[aria-pressed="true"]').inner_text()
+        check(f"{abroad['name']}默认底图是 OSM 而不是高德", active == "OSM", active)
+        check(f"{abroad['name']}的 {abroad['poiCount']} 个标记都画出来了",
+              visible_pins(page) == abroad["poiCount"], f"实际 {visible_pins(page)}")
 
     log.info("不存在的点位 id 要降级而不是白屏")
     page.goto(base + "?city=chengdu&poi=不存在", wait_until="load")
