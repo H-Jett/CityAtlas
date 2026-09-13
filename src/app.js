@@ -149,7 +149,10 @@ async function mountCity(cityId) {
   ctx.filters.setCity(city.pois, state.cats);
   dom.poiSearch.value = state.keyword;
   ctx.panel.showOverview(city);
-  ctx.mapView.fitToPois(city.pois);
+  // 用城市数据里作者指定的 center/zoom 作为默认视野，而不是 fitToPois。
+  // 成都有机场和熊猫基地这种远离市区的点位，框住所有点会把 zoom 压到 11，
+  // 市中心十几个标记糊成一团——作者知道哪个视野最能代表这座城市。
+  ctx.mapView.focus(city.center, { zoom: city.zoom, animate: false });
   ctx.mapView.refreshSize();
 }
 

@@ -62,6 +62,11 @@ def run(page, base: str) -> None:
     page.on("console", lambda m: m.type == "error" and errors.append(m.text))
     page.on("pageerror", lambda e: errors.append(str(e)))
 
+    # 期望值从真实数据推导，别写死——数据一加点位就红的测试没人会留着
+    import json
+    index = json.loads((ROOT / "data/cities/index.json").read_text(encoding="utf-8"))
+    total = index["cities"][0]["poiCount"]
+
     log.info("首页 → 城市页")
     page.goto(base, wait_until="load")
     page.wait_for_selector(".city-card")
@@ -69,7 +74,7 @@ def run(page, base: str) -> None:
     page.locator(".city-card").first.click()
     page.wait_for_selector(".pin-wrap")
     check("点卡片进到城市页，URL 带上 city", "city=chengdu" in page.url, page.url)
-    check("标记都画出来了", visible_pins(page) == 3, f"实际 {visible_pins(page)}")
+    check(f"{total} 个标记都画出来了", visible_pins(page) == total, f"实际 {visible_pins(page)}")
     check("筛选 chips 出来了", page.locator(".filters .chip").count() >= 2)
 
     log.info("点标记 → 详情面板")
@@ -87,24 +92,26 @@ def run(page, base: str) -> None:
     check("没有标记还停在 active 态", page.locator(".pin-wrap.active").count() == 0)
 
     log.info("分类筛选")
-    page.locator(".filters .chip:not(.all)").first.click()
+    chip = page.locator(".filters .chip:not(.all)").first
+    want = int(chip.locator(".n").inner_text())  # chip 上的计数就是期望的可见标记数
+    chip.click()
     page.wait_for_timeout(300)
-    check("点一个分类 chip 后只剩这一类", visible_pins(page) == 1, f"实际 {visible_pins(page)}")
+    check(f"点一个分类 chip 后只剩这一类（{want} 个）", visible_pins(page) == want, f"实际 {visible_pins(page)}")
     check("筛选写进了 URL", "cat=" in page.url, page.url)
     page.locator(".filters .chip.all").click()
     page.wait_for_timeout(300)
-    check("点「全部」恢复所有标记", visible_pins(page) == 3, f"实际 {visible_pins(page)}")
+    check("点「全部」恢复所有标记", visible_pins(page) == total, f"实际 {visible_pins(page)}")
     check("恢复全部后 URL 里不留 cat", "cat=" not in page.url, page.url)
 
     log.info("搜索")
-    # 用「盖碗」而不是「茶」：后者在宽窄巷子的正文里也出现（茶馆），
-    # 搜出两条是搜索功能对的表现，不是 bug
-    page.fill("#poi-search", "盖碗")
+    # 挑一个全城只出现一次的词。「茶」「盖碗」这类在别的点位正文里也有，
+    # 搜出多条是搜索功能对的表现，不是 bug——别拿它当断言
+    page.fill("#poi-search", "音叉")
     page.wait_for_timeout(400)
     check("搜索缩小到命中的点位", visible_pins(page) == 1, f"实际 {visible_pins(page)}")
     page.fill("#poi-search", "")
     page.wait_for_timeout(400)
-    check("清空搜索后全部回来", visible_pins(page) == 3, f"实际 {visible_pins(page)}")
+    check("清空搜索后全部回来", visible_pins(page) == total, f"实际 {visible_pins(page)}")
 
     log.info("深链直接进入")
     page.goto(base + "?city=chengdu&poi=cd-cafe-001&base=osm", wait_until="load")
