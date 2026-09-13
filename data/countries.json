@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "note": "国家/地区定义。加一个国家只改这个文件和城市索引里的 country 字段，前端不用动代码。defaultBasemap 可省略，省略时中国大陆用高德、其他用 OSM（高德的海外瓦片是空白的）。",
+  "countries": [
+    { "id": "cn", "name": "中国", "flag": "🇨🇳", "order": 1 },
+    { "id": "kr", "name": "韩国", "flag": "🇰🇷", "order": 2, "defaultBasemap": "osm" }
+  ]
+}

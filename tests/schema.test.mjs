@@ -49,10 +49,23 @@ test('经纬颠倒被点名，而不是只说超范围', () => {
   ok(problems[0].msg.includes('经纬颠倒'), problems[0].msg);
 });
 
-test('境外坐标报错但不误判成经纬颠倒', () => {
+test('跑到别的国家去的坐标报"离城市中心太远"，不误判成经纬颠倒', () => {
+  // 成都的城市文件里混进一个东京的坐标。校验不再挂钩"在不在中国"——
+  // 加了韩国城市之后那个判据就不成立了，改成一律跟城市中心比
   const problems = errorsOf(codes(baseCity([poi({ coord: { lng: 139.76, lat: 35.68 } })])));
   eq(problems.length, 1);
-  ok(problems[0].msg.includes('不在中国境内'), problems[0].msg);
+  ok(problems[0].msg.includes('km'), problems[0].msg);
+  ok(!problems[0].msg.includes('颠倒'), problems[0].msg);
+});
+
+test('境外城市自己的点位不该被当成错误', () => {
+  // 首尔的城市文件放首尔的坐标，天经地义
+  const seoul = {
+    id: 'seoul', name: '首尔', country: 'kr', datum: 'wgs84',
+    center: { lng: 126.978, lat: 37.5665 }, zoom: 12,
+    pois: [poi({ coord: { lng: 126.9767, lat: 37.5798 } })],
+  };
+  eq(codes(seoul), []);
 });
 
 test('点位离城市中心太远报 error', () => {

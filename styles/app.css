@@ -134,10 +134,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .home-head .tagline { margin: .5rem 0 1.25rem; color: var(--fg-dim); font-size: 15px; }
 #home-search { width: min(320px, 100%); }
 
-.city-grid {
-  display: grid; gap: 14px; max-width: 1080px; margin: 0 auto;
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
-}
+/* 外层只负责居中和宽度，真正的网格在每个国家分组内部（.group-grid） */
+.city-grid { max-width: 1080px; margin: 0 auto; }
 
 .city-card {
   display: flex; gap: 14px; align-items: center;
@@ -174,4 +172,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* 国家筛选条（首页），只有两个及以上国家时才出现 */
+#country-bar { margin-top: 14px; padding: 0; background: none; border: 0; }
+
+/* 按国家分组 */
+.country-group + .country-group { margin-top: 28px; }
+.group-head {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 0 0 12px; font-size: 15px; color: var(--fg-dim);
+}
+.group-head .flag { font-size: 18px; }
+.group-head .n { color: var(--fg-faint); font-size: 12px; font-weight: 400; }
+.group-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+/* 卡片右上角的国旗，分组标题之外再给一次产地标识 */
+.city-card { position: relative; }
+.city-card .flag {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 13px; line-height: 1; opacity: .75;
 }

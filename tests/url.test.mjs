@@ -11,7 +11,8 @@ test('空 query 解析出干净的默认状态', () => {
   eq(s.poi, null);
   eq(s.cats, null);
   eq(s.keyword, '');
-  eq(s.base, 'amap');
+  eq(s.base, null, 'base 缺省是 null（交给城市/国家决定），不是某个具体底图');
+  eq(s.country, null);
   eq(s.edit, false);
 });
 
@@ -56,8 +57,8 @@ test('同一组筛选永远产生同一个链接（Set 顺序不影响）', () =
   eq(a, b, '分享出去的链接不该因为点击顺序不同而不同');
 });
 
-test('默认值不写进 URL，链接保持短', () => {
-  eq(buildQuery({ city: 'chengdu', base: 'amap', keyword: '', edit: false }), 'city=chengdu');
+test('空值不写进 URL，链接保持短', () => {
+  eq(buildQuery({ city: 'chengdu', base: null, keyword: '', edit: false }), 'city=chengdu');
   ok(buildQuery({ city: 'chengdu', base: 'osm' }).includes('base=osm'));
 });
 
@@ -67,10 +68,17 @@ test('中文和特殊字符被正确编码', () => {
   eq(parseUrl(q).keyword, '火锅 & 茶');
 });
 
-test('未知底图 id 回落到默认，不让 URL 把地图搞崩', () => {
+test('parseUrl 如实解析底图 id，回落由 app 层按城市可用范围处理', () => {
   eq(parseUrl('?city=x&base=不存在的底图').base, '不存在的底图');
-  // parseUrl 只负责如实解析，回落发生在 findBasemap；这里确认它确实会回落
-  eq(buildQuery(parseUrl('?city=x&base=amap')), 'city=x');
+  // 用户显式选过的底图会一直留在链接里——境外城市默认 OSM、境内默认高德，
+  // 默认值随城市而变，不能在这里按某个固定值省略
+  eq(buildQuery(parseUrl('?city=x&base=amap')), 'city=x&base=amap');
+});
+
+test('country 只在首页有意义，进了城市页就不挂在链接上', () => {
+  eq(buildQuery({ country: 'kr' }), 'country=kr');
+  eq(buildQuery({ city: 'seoul', country: 'kr' }), 'city=seoul');
+  eq(parseUrl('?country=kr').country, 'kr');
 });
 
 test('buildUrl 拼出可分享的完整路径', () => {

@@ -16,7 +16,7 @@ import { filterPois } from './ui/filter.js';
 import { loadCategories, loadCity } from './data/loader.js';
 import { createMap } from './map/mapview.js';
 import { createMarkerLayer } from './map/markers.js';
-import { BASEMAPS, DEFAULT_BASEMAP, findBasemap } from './map/basemaps.js';
+import { basemapsFor, defaultBasemapFor, findBasemap } from './map/basemaps.js';
 import { createEditor } from './editor/editor.js';
 
 const views = {
@@ -51,6 +51,16 @@ const ctx = {
 
 const catsKey = (cats) => (cats === null ? '*' : [...cats].sort().join(','));
 
+/**
+ * 当前该用哪张底图：用户手动选过就用他选的（前提是这座城市能用），
+ * 否则交给城市/国家的默认值——境外城市默认 OSM，因为高德在那边是空白瓦片。
+ */
+function effectiveBase() {
+  const usable = basemapsFor(ctx.entry?.country);
+  if (state.base && usable.some((b) => b.id === state.base)) return state.base;
+  return defaultBasemapFor(ctx.city, ctx.entry?.country);
+}
+
 function showView(name) {
   for (const [key, el] of Object.entries(views)) el.hidden = key !== name;
 }
@@ -65,7 +75,8 @@ function go(patch, mode = 'push') {
 // ---------- 城市页 ----------
 
 function renderBasemapSwitch(activeId) {
-  fill(dom.basemapSwitch, ...BASEMAPS.map((b) =>
+  // 只列这座城市所在国家能用的底图：高德在境外是空白瓦片，列出来只会让人点到一片白
+  fill(dom.basemapSwitch, ...basemapsFor(ctx.entry?.country).map((b) =>
     h('button', {
       type: 'button',
       'aria-pressed': String(b.id === activeId),
@@ -107,7 +118,8 @@ async function mountCity(cityId) {
     ctx.mapView = createMap(dom.map, {
       center: city.center,
       zoom: city.zoom,
-      basemap: state.base,
+      basemap: effectiveBase(),
+      country: entry.country,
       onBasemapFallback: (failed, next) => {
         toast(`${failed.label}的瓦片拉不动，已切到${next.label}`, 'warn', 4000);
         state = { ...state, base: next.id };
@@ -142,9 +154,12 @@ async function mountCity(cityId) {
     });
   }
 
+  // 换城市可能跨国：回退策略和可用底图都要跟着换
+  ctx.mapView.setCountry(entry.country);
+  ctx.mapView.setBasemap(effectiveBase());
   ctx.markers.render(city.pois);
   // 首次挂载也要画一次底图切换，别只在 applyState 里"基准变了才画"——
-  // 第一次进来时 applied.base 和 state.base 恰好相等，那条分支不会触发
+  // 第一次进来时 applied.base 和当前底图恰好相等，那条分支不会触发
   renderBasemapSwitch(ctx.mapView.basemap().id);
   ctx.filters.setCity(city.pois, state.cats);
   dom.poiSearch.value = state.keyword;
@@ -160,7 +175,11 @@ async function applyState() {
   if (!state.city) {
     showView('home');
     applied.city = null;
-    await renderHome({ onOpen: (id) => go({ city: id, poi: null, cats: null, keyword: '' }) });
+    await renderHome({
+      onOpen: (id) => go({ city: id, poi: null, cats: null, keyword: '' }),
+      country: state.country,
+      onCountryChange: (id) => go({ country: id }),
+    });
     return;
   }
 
@@ -179,12 +198,14 @@ async function applyState() {
     Object.assign(applied, {
       city: state.city, poi: null, cats: catsKey(state.cats),
       keyword: state.keyword, base: ctx.mapView.basemap().id,
+      edit: false,
     });
   }
 
-  if (applied.base !== state.base) {
-    renderBasemapSwitch(ctx.mapView.setBasemap(state.base).id);
-    applied.base = state.base;
+  const wantBase = effectiveBase();
+  if (applied.base !== wantBase) {
+    renderBasemapSwitch(ctx.mapView.setBasemap(wantBase).id);
+    applied.base = wantBase;
   }
 
   if (applied.cats !== catsKey(state.cats) || applied.keyword !== state.keyword) {

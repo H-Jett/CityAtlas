@@ -2,6 +2,7 @@
   "schema": 1,
   "id": "chengdu",
   "name": "成都",
+  "country": "cn",
   "datum": "wgs84",
   "center": { "lng": 104.063299, "lat": 30.659841 },
   "zoom": 13,

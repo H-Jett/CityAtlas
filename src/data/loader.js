@@ -4,7 +4,10 @@
 // 子路径（/CityAtlas/）下，页面 URL 还带 query，相对路径很容易解析到意外的地方。
 // 以模块自身位置为基准最稳，本地 http.server 和 Pages 上行为一致。
 
-import { normalizeCategories, normalizeCity, validateCity, formatProblems, errorsOf } from './schema.js';
+import {
+  normalizeCategories, normalizeCountries, normalizeCity,
+  validateCity, formatProblems, errorsOf,
+} from './schema.js';
 
 const DATA_BASE = new URL('../../data/', import.meta.url);
 
@@ -25,10 +28,16 @@ export async function loadCategories() {
   return normalizeCategories(await loadJSON('categories.json'));
 }
 
+export async function loadCountries() {
+  return normalizeCountries(await loadJSON('countries.json'));
+}
+
 /** 首页数据源。返回 { updated, cities: [...] } */
 export async function loadCityIndex() {
   const raw = await loadJSON('cities/index.json');
-  const cities = (raw?.cities ?? []).filter((c) => c && c.id);
+  const cities = (raw?.cities ?? [])
+    .filter((c) => c && c.id)
+    .map((c) => ({ ...c, country: c.country ?? 'cn' }));
   return { updated: raw?.updated ?? '', cities };
 }
 

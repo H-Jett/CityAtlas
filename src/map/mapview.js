@@ -18,6 +18,7 @@ export function createMap(el, {
   center,
   zoom = 12,
   basemap = DEFAULT_BASEMAP,
+  country = 'cn',
   onClick = null,
   onBasemapFallback = null,
 } = {}) {
@@ -59,7 +60,7 @@ export function createMap(el, {
       if (errors < TILE_ERROR_LIMIT || fallbackUsed) return;
       // 只自动回退一次：来回跳的体验比看不到图还糟
       fallbackUsed = true;
-      const next = fallbackFor(spec.id);
+      const next = fallbackFor(spec.id, country);
       if (!next) return;
       console.warn(`[map] ${spec.label} 瓦片连续失败 ${errors} 次，回退到 ${next.label}`);
       setBasemap(next.id);
@@ -140,6 +141,8 @@ export function createMap(el, {
     map,
     datum: () => base.datum,
     basemap: () => base,
+    /** 换城市时要跟着换：决定瓦片挂了往哪个源回退 */
+    setCountry(next) { country = next; },
     setBasemap,
     focus,
     fitToPois,

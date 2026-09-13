@@ -5,16 +5,15 @@
 // 把戏。query 不改路径，刷新、分享、右键新开标签页都是原生行为。
 //
 // 参数：
-//   city  城市 id            poi   选中的点位 id
-//   cat   分类筛选           q     搜索关键词
-//   base  底图 id            edit  编辑模式
+//   city    城市 id          poi   选中的点位 id
+//   country 首页的国家筛选    cat   分类筛选
+//   q       搜索关键词        base  底图 id
+//   edit    编辑模式
 //
 // cat 有三态，缺省和空串含义不同，别用 `params.get('cat') || ''` 之类的写法抹平：
 //   没有 cat 参数 → null（全部）
 //   cat=（空串）  → 空集（一个不看）
 //   cat=food,cafe → 只看这两类
-
-import { DEFAULT_BASEMAP } from './map/basemaps.js';
 
 /** 解析 location.search。传进来的可以带不带 ? 都行 */
 export function parseUrl(search = '') {
@@ -23,10 +22,12 @@ export function parseUrl(search = '') {
 
   return {
     city: params.get('city') || null,
+    country: params.get('country') || null,
     poi: params.get('poi') || null,
     cats: rawCat === null ? null : new Set(rawCat.split(',').filter(Boolean)),
     keyword: params.get('q') ?? '',
-    base: params.get('base') || DEFAULT_BASEMAP,
+    // null = 用户没选过，交给城市/国家决定默认底图
+    base: params.get('base') || null,
     edit: params.get('edit') === '1',
   };
 }
@@ -37,13 +38,15 @@ export function buildQuery(state = {}) {
   const push = (key, value) => parts.push(`${key}=${encodeURIComponent(value)}`);
 
   if (state.city) push('city', state.city);
+  // 国家只在首页有意义，进了城市页就不必挂在链接上了
+  if (!state.city && state.country) push('country', state.country);
   if (state.poi) push('poi', state.poi);
   if (state.cats instanceof Set) {
     // 排序后再拼，保证同一组筛选产生同一个链接（否则分享出去的 URL 每次都不一样）
     parts.push(`cat=${[...state.cats].sort().map(encodeURIComponent).join(',')}`);
   }
   if (state.keyword) push('q', state.keyword);
-  if (state.base && state.base !== DEFAULT_BASEMAP) push('base', state.base);
+  if (state.base) push('base', state.base);
   if (state.edit) push('edit', '1');
 
   return parts.join('&');

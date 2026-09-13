@@ -8,7 +8,7 @@
 // 目标是幂等：导出 → 粘回来 → 再导出，字节完全一致。不幂等的话，每次打开编辑器
 // 又关掉都会产生一个非空 diff，久了就没人相信这个 diff 了。
 
-const CITY_KEYS = ['schema', 'id', 'name', 'datum', 'center', 'zoom', 'updated', 'notes', 'pois'];
+const CITY_KEYS = ['schema', 'id', 'name', 'country', 'datum', 'center', 'zoom', 'basemap', 'updated', 'notes', 'pois'];
 const POI_KEYS = [
   'id', 'name', 'category', 'coord',
   'summary', 'desc', 'why', 'tags',
